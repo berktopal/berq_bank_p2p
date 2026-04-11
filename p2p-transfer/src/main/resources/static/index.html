@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berq Bank</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body data-theme="dark">
+
+<audio id="successSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+
+<div id="loginArea">
+    <div class="login-settings">
+        <button class="nav-btn" onclick="toggleLanguage()">🌐 <span class="lang-toggle-text">EN</span></button>
+        <button class="nav-btn" onclick="toggleTheme()">🌓 <span class="lang-theme">Aydınlık</span></button>
+    </div>
+    <div class="login-card">
+        <h1 style="margin: 0 0 10px 0; font-weight: 800; font-size: 30px;">🏦 Berq Bank</h1>
+        <p id="lang-login-msg" style="margin-bottom: 35px; opacity: 0.7; font-size: 15px;">Dijital şubeye hoş geldiniz</p>
+        <input type="email" id="email" placeholder="E-posta" style="margin-bottom: 20px;">
+        <div class="pw-container">
+            <input type="password" id="password" placeholder="Şifre">
+            <span class="pw-toggle" id="eyeIcon" onclick="togglePassword()">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </span>
+        </div>
+        
+        <div id="loginErrorMsg" style="color: var(--error); font-size: 13px; font-weight: bold; text-align: left; display: none; margin-bottom: 15px;">❌ Giriş başarısız! Lütfen tekrar deneyin.</div>
+
+        <button class="action-btn" id="lang-login-btn" style="background: var(--primary);" onclick="login()">Giriş Yap</button>
+    </div>
+</div>
+
+<div id="mainDashboard">
+    <div class="navbar">
+        <h2>Ber<span class="brand-q">q</span> Bank</h2>
+        <div class="nav-actions">
+            <button class="nav-btn" onclick="toggleLanguage()">🌐 <span class="lang-toggle-text">EN</span></button>
+            <button class="nav-btn" onclick="toggleTheme()">🌓 <span class="lang-theme">Aydınlık</span></button>
+            <button class="nav-btn danger" onclick="location.reload()">🚪 <span id="lang-logout">Çıkış Yap</span></button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="top-row">
+            <div class="card account-card">
+                <div class="acc-welcome"><span id="lang-hello">Merhaba</span>, <span id="uName">...</span>!</div>
+                <h1 class="acc-balance" id="uBalance">0.00 <span class="acc-currency">TL</span></h1>
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
+                    <code class="acc-iban" id="uIban" style="margin-top: 0; cursor: default;">TR...</code>
+                    <span class="copy-icon" onclick="copyIban()" title="Kopyala" style="cursor: pointer;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="card">
+                <h4 id="lang-quick-transfer" style="margin: 0 0 15px 0;">💸 Hızlı Para Transferi</h4>
+                <div id="quickContacts" class="quick-contact"></div>
+                <div class="iban-input-container">
+                    <span class="iban-prefix">TR</span>
+                    <input type="text" id="targetIban" class="iban-field" placeholder="0000 0000 0000 0000 0000 0000" oninput="formatIban(this)">
+                </div>
+                <div id="receiverName" style="color:var(--success); font-size:11px; height:12px; margin-top:5px;"></div>
+                <input type="text" id="amt" placeholder="Miktar" oninput="onlyNumbers(this)" style="margin-top:8px;">
+                <button class="action-btn" id="lang-send-btn" onclick="transfer()">Gönder</button>
+            </div>
+
+            <div class="card" style="align-items: center; justify-content: center;">
+                <h4 id="lang-analysis" style="align-self: flex-start; margin: 0 0 10px 0;">📊 Harcama Dağılımı</h4>
+                <div style="width: 100%; height: 180px;"><canvas id="expenseChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="card bottom-row table-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 25px 25px 15px 25px;">
+                <h4 id="lang-recent" style="margin: 0;">📜 Son Hesap Hareketleri</h4>
+                <input type="text" id="searchInput" placeholder="Ara..." onkeyup="filterTable()">
+            </div>
+            <div class="table-wrapper">
+                <table id="tTable">
+                    <thead>
+                        <tr>
+                            <th id="lang-th-date">Tarih</th>
+                            <th id="lang-th-name">İsim</th>
+                            <th id="lang-th-iban">IBAN</th>
+                            <th id="lang-th-amount">Tutar</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Önbellek kırma garantisi
+    var script = document.createElement('script');
+    script.src = '/script.js?v=' + new Date().getTime();
+    document.body.appendChild(script);
+</script>
+</body>
+</html>
