@@ -37,5 +37,5 @@ Berq Bank is a modern digital banking application architected to allow users to 
     ./mvnw spring-boot:run
     ```
 
-3.  **TBrowser Access:**
+3.  **Browser Access:**
     Navigate to `http://localhost:8080`.
