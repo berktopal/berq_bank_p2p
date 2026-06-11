@@ -1,41 +1,41 @@
-# 🏦 Berq Bank - P2P Para Transfer Sistemi
+#  Berq Bank - P2P Money Transfer System
 
-Berq Bank, kullanıcıların güvenli bir şekilde giriş yapabildiği, hesap bakiyelerini takip edebildiği ve anlık olarak IBAN üzerinden para transferi gerçekleştirebildiği modern bir dijital bankacılık uygulamasıdır.
+Berq Bank is a modern digital banking application architected to allow users to securely log in, monitor account balances, and execute instant money transfers via IBAN.
 
-## ✨ Özellikler
+##  Features
 
-* 🔐 **Güvenli Giriş Sistemi:** Hatalı şifre denemelerinde kullanıcı dostu, sayfa içi hata bildirimleri.
-* 💸 **P2P Para Transferi:** IBAN üzerinden anlık para gönderimi ve bakiye güncelleme.
-* 📊 **Harcama Analizi:** Chart.js ile görselleştirilmiş harcama dağılımı grafiği.
-* 📜 **İşlem Geçmişi:** Yapılan tüm transferlerin detaylı listesi ve arama filtresi.
-* 🌓 **Karanlık/Aydınlık Mod:** Kullanıcı tercihine göre değişen modern arayüz.
-* 🌐 **Çoklu Dil Desteği:** Türkçe ve İngilizce dil seçenekleri.
+**Secure Login System:** User-friendly, in-page error notifications for incorrect password attempts.
+**P2P Money Transfer:** Instant money transfers via IBAN and balance updates.
+**Expense Analysis:** Expense distribution charts visualized with Chart.js.
+**Transaction History:** Detailed list of all executed transfers and a search filter.
+**Dark/Light Mode:** A modern interface that adapts to user preferences.
+**Multi-Language Support:** Turkish and English language options.
 
-## 🛠️ Kullanılan Teknolojiler
+##  Technologies Used
 
 ### Backend
 * **Java 21**
 * **Spring Boot 4.0.5**
 * **Spring Data JPA**
-* **PostgreSQL** (Veritabanı)
+* **PostgreSQL** (Database)
 * **Lombok**
 
 ### Frontend
-* **HTML5 & CSS3** (Modern ve Responsive tasarım)
+* **HTML5 & CSS3** (Modern and Responsive design)
 * **Vanilla JavaScript**
-* **Chart.js** (Grafikler için)
-* **SweetAlert2** (Şık bildirimler için)
+* **Chart.js** (For charts)
+* **SweetAlert2** (For elegant notifications)
 
-## 🚀 Kurulum ve Çalıştırma
+##  Setup and Execution
 
-1.  **Veritabanı Ayarları:**
-    * PostgreSQL'de `p2p_db` isimli bir veritabanı oluşturun.
-    * `src/main/resources/application.properties` dosyasındaki kullanıcı adı ve şifreyi kendi yerel ayarlarınıza göre güncelleyin.
+1.  **VDatabase Configuration:**
+    * Create a database named `p2p_db` in PostgreSQL.
+    * Update the username and password in the `src/main/resources/application.properties` file according to your local environment.
 
-2.  **Projeyi Çalıştırma:**
+2.  **Running the Project:**
     ```bash
     ./mvnw spring-boot:run
     ```
 
-3.  **Tarayıcıdan Erişim:**
-    `http://localhost:8080` adresine gidin.
+3.  **TBrowser Access:**
+    Navigate to `http://localhost:8080`.
