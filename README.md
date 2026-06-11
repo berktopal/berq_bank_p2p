@@ -4,12 +4,12 @@ Berq Bank is a modern digital banking application architected to allow users to 
 
 ##  Features
 
-  **Secure Login System:** User-friendly, in-page error notifications for incorrect password attempts.
-  **P2P Money Transfer:** Instant money transfers via IBAN and balance updates.
-  **Expense Analysis:** Expense distribution charts visualized with Chart.js.
-  **Transaction History:** Detailed list of all executed transfers and a search filter.
-  **Dark/Light Mode:** A modern interface that adapts to user preferences.
-  **Multi-Language Support:** Turkish and English language options.
+*  **Secure Login System:** User-friendly, in-page error notifications for incorrect password attempts.
+*  **P2P Money Transfer:** Instant money transfers via IBAN and balance updates.
+*  **Expense Analysis:** Expense distribution charts visualized with Chart.js.
+*  **Transaction History:** Detailed list of all executed transfers and a search filter.
+*  **Dark/Light Mode:** A modern interface that adapts to user preferences.
+*  **Multi-Language Support:** Turkish and English language options.
 
 ##  Technologies Used
 
