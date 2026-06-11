@@ -28,7 +28,7 @@ Berq Bank is a modern digital banking application architected to allow users to 
 
 ##  Setup and Execution
 
-1.  **VDatabase Configuration:**
+1.  **Database Configuration:**
     * Create a database named `p2p_db` in PostgreSQL.
     * Update the username and password in the `src/main/resources/application.properties` file according to your local environment.
 
