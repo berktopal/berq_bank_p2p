@@ -18,7 +18,6 @@ Berq Bank is a modern digital banking application architected to allow users to 
 * **Spring Boot 4.0.5**
 * **Spring Data JPA**
 * **PostgreSQL** (Database)
-* **Lombok**
 
 ### Frontend
 * **HTML5 & CSS3** (Modern and Responsive design)
