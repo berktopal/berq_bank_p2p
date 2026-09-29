@@ -1,8 +1,13 @@
 package p2p_transfer.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import p2p_transfer.dto.ApiViews.UserView;
 import p2p_transfer.entity.User;
+import p2p_transfer.security.SessionAuth;
 import p2p_transfer.service.UserService;
+
 import java.util.Map;
 
 @RestController
@@ -14,17 +19,24 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Kullanıcı Kaydı (Register)
+    // Kullanıcı Kaydı (Register) — yanıtta şifre/TCKN dönmez
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.saveUser(user);
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserView createUser(@RequestBody User user) {
+        return UserView.of(userService.saveUser(user));
     }
 
-    // --- YENİ EKLENEN: GİRİŞ YAPMA (LOGIN) ---
+    // Giriş: başarılıysa sunucu tarafında oturum açılır
     @PostMapping("/login")
-    public User login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
-        return userService.login(email, password);
+    public UserView login(@RequestBody Map<String, String> credentials, HttpServletRequest request) {
+        User user = userService.login(credentials.get("email"), credentials.get("password"));
+        SessionAuth.signIn(request, user.getId());
+        return UserView.of(user);
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(HttpServletRequest request) {
+        SessionAuth.signOut(request);
     }
 }
