@@ -67,6 +67,15 @@ function toggleTheme() {
     if(user) refreshData();
 }
 
+// Kullanıcıdan gelen verileri (isim, IBAN) HTML'e basmadan önce kaçışla: stored XSS önlemi
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function logout() {
+    try { await fetch('/api/users/logout', {method: 'POST'}); } finally { location.reload(); }
+}
+
 function onlyNumbers(input) { input.value = input.value.replace(/[^0-9.]/g, ''); }
 
 function formatIban(input) {
@@ -105,14 +114,17 @@ async function login() {
 }
 
 async function refreshData() {
-    const accRes = await fetch(`/api/accounts/user/${user.id}`);
+    const accRes = await fetch('/api/accounts');
+    if (accRes.status === 401) return location.reload(); // oturum düştüyse girişe dön
     const accounts = await accRes.json();
     acc = accounts[0];
     document.getElementById('uBalance').innerHTML = `${acc.balance.toLocaleString('tr-TR', {minimumFractionDigits: 2})} <span class="acc-currency">TL</span>`;
     
     document.getElementById('uIban').innerText = acc.iban.replace(/(.{4})/g, '$1 ').trim();
 
+    // Sunucu artık sadece bu kullanıcının işlemlerini döndürüyor
     const tRes = await fetch('/api/transactions');
+    if (tRes.status === 401) return location.reload();
     const allTransactions = await tRes.json();
     const myTransactions = allTransactions.filter(t => t.senderAccount.id === acc.id || t.receiverAccount.id === acc.id);
 
@@ -131,17 +143,21 @@ async function refreshData() {
             const rawReceiverIban = t.receiverAccount.iban;
             const rIban = rawReceiverIban.replace(/(.{4})/g, '$1 ').trim(); 
             
-            tbody.innerHTML += `<tr><td>${date}</td><td>${rName}</td><td>${rIban}</td><td class="amt-neg">-${amount} TL</td></tr>`;
+            tbody.innerHTML += `<tr><td>${date}</td><td>${escapeHtml(rName)}</td><td>${escapeHtml(rIban)}</td><td class="amt-neg">-${amount} TL</td></tr>`;
             chartData[rName] = (chartData[rName] || 0) + t.amount;
             
             if(!contacts[rawReceiverIban]) {
                 contacts[rawReceiverIban] = rName;
-                contactDiv.innerHTML += `<div class="contact-item" onclick="fillIban('${rawReceiverIban}')">${t.receiverAccount.user.firstName}</div>`;
+                const item = document.createElement('div');
+                item.className = 'contact-item';
+                item.textContent = t.receiverAccount.user.firstName;
+                item.addEventListener('click', () => fillIban(rawReceiverIban));
+                contactDiv.appendChild(item);
             }
         } else {
             const sName = t.senderAccount.user.firstName + " " + t.senderAccount.user.lastName;
             const sIban = t.senderAccount.iban.replace(/(.{4})/g, '$1 ').trim();
-            tbody.innerHTML += `<tr><td>${date}</td><td>${sName}</td><td>${sIban}</td><td class="amt-pos">+${amount} TL</td></tr>`;
+            tbody.innerHTML += `<tr><td>${date}</td><td>${escapeHtml(sName)}</td><td>${escapeHtml(sIban)}</td><td class="amt-pos">+${amount} TL</td></tr>`;
         }
     });
     updateChart(chartData);
@@ -149,10 +165,10 @@ async function refreshData() {
 
 async function checkIban(fullIban) {
     const info = document.getElementById('receiverName');
-    const res = await fetch(`/api/accounts/iban/${fullIban}`);
+    const res = await fetch(`/api/accounts/iban/${encodeURIComponent(fullIban)}`);
     if(res.ok) { 
         const t = await res.json(); 
-        info.innerText = `✅ ${t.user.firstName} ${t.user.lastName}`; 
+        info.innerText = `✅ ${t.ownerName}`; 
         targetId = t.id; 
     } else { info.innerText = "❌"; targetId = null; }
 }

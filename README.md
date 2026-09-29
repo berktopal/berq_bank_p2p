@@ -11,6 +11,15 @@ Berq Bank is a modern digital banking application architected to allow users to 
 *  **Dark/Light Mode:** A modern interface that adapts to user preferences.
 *  **Multi-Language Support:** Turkish and English language options.
 
+##  Security
+
+* **Server-side sessions:** Login creates an HttpOnly, SameSite=Strict session cookie; every account and transfer endpoint requires it.
+* **Ownership checks:** Users can only view their own accounts/transactions and can only send money from accounts they own.
+* **Transfer validation:** Amounts must be positive with at most 2 decimals; same-currency only; balance rows are locked (`PESSIMISTIC_WRITE`) to prevent double spending.
+* **Password hashing:** Passwords are stored as BCrypt hashes (legacy plaintext records are upgraded on next login).
+* **Data minimization:** API responses use DTOs, so passwords, TCKN and other users' balances are never exposed; IBAN lookup returns a masked name.
+* **XSS protection:** User-provided values are escaped before being rendered in the dashboard.
+
 ##  Technologies Used
 
 ### Backend
@@ -29,7 +38,8 @@ Berq Bank is a modern digital banking application architected to allow users to 
 
 1.  **Database Configuration:**
     * Create a database named `p2p_db` in PostgreSQL.
-    * Update the username and password in the `src/main/resources/application.properties` file according to your local environment.
+    * Set your database password as an environment variable (never commit it): `export DB_PASSWORD=your_password`.
+    * If needed, update the username in `src/main/resources/application.properties`.
 
 2.  **Running the Project:**
     ```bash
