@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Derlenmiş React uygulaması (frontend/ → npm run build:backend) ###
+src/main/resources/static/
