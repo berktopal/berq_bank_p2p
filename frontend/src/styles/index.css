@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/* Tema data-theme özniteliğiyle seçilir (bkz. public/theme-init.js) */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Berq Bank renk sistemi. Marka: mavi #3498db → mor #6c5ce7 (v1 arayüzünden).
+ * Beyaz metin taşıyan "primary" tonu WCAG AA (≥4.5:1) için koyulaştırılmıştır.
+ */
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-2: #f0f3f8;
+  --border: #e2e7ef;
+  --text: #0f172a;
+  --muted: #5b6576;
+  --primary: #1f6fbf;
+  --primary-hover: #1a5fa5;
+  --primary-soft: #e6f0fa;
+  --on-primary: #ffffff;
+  --brand-from: #6c5ce7;
+  --brand-to: #3498db;
+  --success: #17804a;
+  --success-soft: #e3f5ea;
+  --danger: #c93636;
+  --danger-soft: #fbe8e8;
+  --warning: #9a6200;
+  --warning-soft: #fdf1dc;
+  --ring: #3498db;
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.06);
+  /* Grafik serileri (dataviz doğrulayıcısından geçmiş kategorik slot 1-2) */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --grid: #e8ebf0;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #121316;
+  --surface: #1b1c20;
+  --surface-2: #23252b;
+  --border: #2e3038;
+  --text: #f2f3f6;
+  --muted: #9aa2b1;
+  --primary: #4a9ae6;
+  --primary-hover: #66abee;
+  --primary-soft: #1b2a3b;
+  --on-primary: #0b1420;
+  --success: #3ccf7f;
+  --success-soft: #15291e;
+  --danger: #f06a6a;
+  --danger-soft: #331b1d;
+  --warning: #f0b450;
+  --warning-soft: #33281a;
+  --ring: #66abee;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --grid: #2a2c32;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary: var(--on-primary);
+  --color-brand-from: var(--brand-from);
+  --color-brand-to: var(--brand-to);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-ring: var(--ring);
+  --shadow-card: var(--shadow);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-grid: var(--grid);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Tutarlar, IBAN ve referanslar için sabit genişlikli rakamlar */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility brand-gradient {
+  background-image: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+}
+
+@utility card {
+  @apply bg-surface border-border rounded-2xl border shadow-card;
+  /* grid/flex içinde grafik gibi geniş içerik kartı taşırmasın */
+  min-width: 0;
+}
+
+/* Dekont yazdırma: yalnızca .print-area görünür */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+@utility select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%238b93a1'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-size: 1.1rem;
+}
+
+/* Native <dialog> için arka plan ve giriş animasyonu */
+dialog::backdrop {
+  background: rgb(10 12 18 / 0.55);
+  backdrop-filter: blur(2px);
+}
+dialog[open] {
+  animation: dialog-in 160ms ease-out;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}

@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/target
+**/test-results
+**/playwright-report
+**/coverage
+p2p-transfer/src/main/resources/static
+.git
+.vscode
