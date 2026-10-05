@@ -103,6 +103,15 @@ class NotificationApiTests extends IntegrationTest {
     }
 
     @Test
+    void openStreamsPerUserAreCapped() {
+        User ada = data.user("Ada");
+        for (int i = 0; i < NotificationStreams.MAX_CONNECTIONS_PER_USER + 3; i++) {
+            streams.subscribe(ada.getId());
+        }
+        assertThat(streams.connectionCount(ada.getId())).isEqualTo(NotificationStreams.MAX_CONNECTIONS_PER_USER);
+    }
+
+    @Test
     void streamRequiresAuthentication() throws Exception {
         mvc.perform(get("/api/notifications/stream").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isUnauthorized());

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * böylece kimliği doğrulanmış isteklerde kullanıcı bazında sayılabilir.
  * <ul>
  *   <li>giriş / kayıt: IP başına (kaba kuvvet ve toplu hesap açma)</li>
- *   <li>IBAN sorgusu: kullanıcı başına (IBAN tarayarak kimin hesabı olduğunu bulma)</li>
+ *   <li>IBAN'dan isim öğrenilebilen her şey (sorgu, alıcı kaydetme, talimat): kullanıcı başına ortak kota</li>
  *   <li>transfer, istek ödeme, para isteme: kullanıcı başına</li>
  * </ul>
  */
@@ -38,6 +38,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
             new Route("login", "POST", Pattern.compile("^/api/auth/login$"), false, RateLimit::login),
             new Route("register", "POST", Pattern.compile("^/api/auth/register$"), false, RateLimit::register),
             new Route("lookup", "GET", Pattern.compile("^/api/accounts/lookup$"), true, RateLimit::lookup),
+            // IBAN'dan isim döndüren diğer uç noktalar da aynı kotayı paylaşır; yoksa tarama koruması bunlarla aşılırdı
+            new Route("lookup", "POST", Pattern.compile("^/api/(contacts|scheduled-transfers)$"), true, RateLimit::lookup),
             new Route("transfer", "POST", Pattern.compile("^/api/(transactions/transfer|payment-requests/\\d+/pay)$"), true, RateLimit::transfer),
             new Route("payment-request", "POST", Pattern.compile("^/api/payment-requests$"), true, RateLimit::paymentRequest));
 

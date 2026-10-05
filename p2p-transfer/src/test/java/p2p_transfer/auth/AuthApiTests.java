@@ -139,6 +139,26 @@ class AuthApiTests extends IntegrationTest {
     }
 
     @Test
+    void changingPasswordSignsOutOtherSessionsButKeepsTheCurrentOne() throws Exception {
+        data.user("Ada");
+        MockHttpSession laptop = (MockHttpSession) login("ada@test.local", TestData.PASSWORD)
+                .andExpect(status().isOk()).andReturn().getRequest().getSession(false);
+        MockHttpSession stolen = (MockHttpSession) login("ada@test.local", TestData.PASSWORD)
+                .andExpect(status().isOk()).andReturn().getRequest().getSession(false);
+        mvc.perform(get("/api/auth/me").session(stolen)).andExpect(status().isOk());
+
+        mvc.perform(post("/api/profile/password").session(laptop).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"currentPassword\":\"" + TestData.PASSWORD + "\",\"newPassword\":\"NewSecret9\"}"))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(get("/api/auth/me").session(stolen))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+        mvc.perform(get("/api/auth/me").session(laptop)).andExpect(status().isOk());
+    }
+
+    @Test
     void profileMasksTckn() throws Exception {
         User ada = data.user("Ada");
         mvc.perform(get("/api/profile").with(TestData.as(ada)))

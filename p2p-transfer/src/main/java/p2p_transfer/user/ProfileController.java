@@ -1,9 +1,12 @@
 package p2p_transfer.user;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,10 +29,12 @@ public class ProfileController {
 
     private final UserRepository userRepository;
     private final AuthService authService;
+    private final SessionRegistry sessionRegistry;
 
-    public ProfileController(UserRepository userRepository, AuthService authService) {
+    public ProfileController(UserRepository userRepository, AuthService authService, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.authService = authService;
+        this.sessionRegistry = sessionRegistry;
     }
 
     public record ProfileResponse(Long id, String firstName, String lastName, String email, String maskedTckn, Instant createdAt) {
@@ -44,7 +49,13 @@ public class ProfileController {
 
     @PostMapping("/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changePassword(@AuthenticationPrincipal AuthUser me, @Valid @RequestBody ChangePasswordRequest request) {
+    public void changePassword(@AuthenticationPrincipal AuthUser me, @Valid @RequestBody ChangePasswordRequest request,
+                               HttpServletRequest http) {
         authService.changePassword(me.id(), request.currentPassword(), request.newPassword());
+        // Şifre değiştiyse (ör. hesap ele geçirildiği için) diğer cihazlardaki oturumlar kapanır; bu oturum kalır
+        String current = http.getSession().getId();
+        sessionRegistry.getAllSessions(me, false).stream()
+                .filter(s -> !s.getSessionId().equals(current))
+                .forEach(SessionInformation::expireNow);
     }
 }
