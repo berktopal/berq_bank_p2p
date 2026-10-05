@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # 2) Spring Boot jar'ını SPA gömülü olarak derle (testler CI'da koşar)
-FROM eclipse-temurin:21-jdk-alpine AS api
+FROM eclipse-temurin:25-jdk-alpine AS api
 WORKDIR /app
 COPY p2p-transfer/.mvn .mvn
 COPY p2p-transfer/mvnw p2p-transfer/pom.xml ./
@@ -19,7 +19,7 @@ COPY --from=web /web/dist src/main/resources/static
 RUN ./mvnw -B -q package -DskipTests && cp target/*.jar app.jar
 
 # 3) Küçük, root olmayan çalışma imajı
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup -S berq && adduser -S berq -G berq
 USER berq
 WORKDIR /app
