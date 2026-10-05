@@ -1,0 +1,31 @@
+# Tek komutla tam ortam: docker compose up --build  →  http://localhost:8080
+# Demo verisi için: SPRING_PROFILES_ACTIVE=demo docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: p2p_db
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-berq-local-only}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d p2p_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/p2p_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-berq-local-only}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
