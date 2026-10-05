@@ -217,7 +217,7 @@ All endpoints except `auth/register`, `auth/login`, `auth/csrf` and `public/conf
 ## Project structure
 
 ```
-p2p-transfer/                      Spring Boot 4 · Java 21
+p2p-transfer/                      Spring Boot 4 · Java 25
   src/main/java/p2p_transfer/
     auth/  account/  transfer/  contact/  analytics/  user/   feature packages
     request/  schedule/  budget/  notification/  ratelimit/

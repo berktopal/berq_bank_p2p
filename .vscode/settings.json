@@ -1,3 +1,6 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic"
+    // Spring 7'nin null işaretleriyle editörde yanlış alarm üretiyor; derleme ve testler etkilenmez
+    "java.compile.nullAnalysis.mode": "disabled",
+    // pom.xml değişince proje sormadan yeniden içe aktarılır
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

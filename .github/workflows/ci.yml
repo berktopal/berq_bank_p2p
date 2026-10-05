@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: maven
       # Entegrasyon testleri gömülü PostgreSQL 16 ile koşar; ayrı bir veritabanı servisi gerekmez
       - name: Build and test
@@ -64,7 +64,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: maven
       - uses: actions/setup-node@v5
         with:
