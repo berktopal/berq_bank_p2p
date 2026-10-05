@@ -57,7 +57,7 @@ class ScheduledTransferTests extends IntegrationTest {
     void oneOffTransferRunsOnItsDateAndCompletes() throws Exception {
         Integer id = idOf(create("ONCE", today.plusDays(3), null, "250").andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.toName").value("Bob Test")));
+                .andExpect(jsonPath("$.toName").value("Bob T***")));
 
         assertThat(service.runDue(at(today.plusDays(2)))).isZero();
         assertThat(data.balance(bobAcc)).isEqualByComparingTo("0");

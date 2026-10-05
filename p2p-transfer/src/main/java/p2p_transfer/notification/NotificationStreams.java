@@ -22,12 +22,20 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class NotificationStreams {
 
     private static final long TIMEOUT_MILLIS = Duration.ofMinutes(30).toMillis();
+    /** Kullanıcı başına açık bağlantı sınırı: birkaç sekme yeter; binlerce bağlantıyla sunucu yorulamasın. */
+    static final int MAX_CONNECTIONS_PER_USER = 5;
 
     private final Map<Long, Set<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter subscribe(Long userId) {
         SseEmitter emitter = new SseEmitter(TIMEOUT_MILLIS);
         Set<SseEmitter> set = emitters.computeIfAbsent(userId, id -> new CopyOnWriteArraySet<>());
+        // Sınır aşılırsa en eski bağlantı kapatılır (muhtemelen kapatılmış bir sekmeden kalmıştır)
+        while (set.size() >= MAX_CONNECTIONS_PER_USER) {
+            SseEmitter oldest = set.iterator().next();
+            set.remove(oldest);
+            oldest.complete();
+        }
         set.add(emitter);
         Runnable remove = () -> set.remove(emitter);
         emitter.onCompletion(remove);

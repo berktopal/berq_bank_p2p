@@ -20,7 +20,12 @@ cd ../p2p-transfer
 ./mvnw spring-boot:test-run -Dspring-boot.run.main-class=p2p_transfer.DevServer
 ```
 
-Open http://localhost:8080 and click **“Demo ile giriş yap”** (`demo@berqbank.dev` / `Demo1234`).
+Open http://localhost:8080 and click **“Demo ile giriş yap”** (“Log in with demo”).
+
+The demo users (`demo@berqbank.dev`, `ayse@…`, `zeynep@…` — password `Demo1234`) are fictional and only exist when the
+`demo` profile is active: the dev server above uses a throwaway embedded database recreated on every start, and a normal run
+(`spring-boot:run`, Docker without `SPRING_PROFILES_ACTIVE=demo`) never creates them. The login page only offers the
+demo button when the server reports demo mode.
 
 ## Features
 
@@ -109,6 +114,31 @@ Listeners run inside the transfer's transaction, so a rolled-back transfer never
 | `Clock` injected everywhere | Time-based rules (lockout, daily limit, monthly analytics) are unit-testable |
 | Feature packages (`auth`, `account`, `transfer`, …) | Each feature's controller, service, repository and DTOs live together |
 
+## Security notes
+
+**Protected against** (each has a test): IDOR on every resource, CSRF, session fixation, XSS (no raw HTML;
+React escaping), CSV formula injection, open redirects after login, double spending under concurrency,
+duplicate transfers on retry, brute-force login (per-IP limit + account lockout), IBAN owner enumeration
+(masked names everywhere a stranger's IBAN is resolved, shared per-user quota), stale sessions after a
+password change (other sessions are expired), unbounded live connections (5 per user).
+
+**Before deploying publicly**
+
+| | |
+|---|---|
+| HTTPS | Terminate TLS in front of the app and set `COOKIE_SECURE=true` |
+| Proxy | `server.forward-headers-strategy=native` trusts `X-Forwarded-*` only from private-network proxies, so rate limits see real client IPs |
+| Secrets | Database credentials only via environment variables (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) |
+| Demo | Don't enable the `demo` profile on a public instance unless you want anyone to use the demo account |
+
+**Known limitations (accepted for a portfolio project)**
+
+- Rate limits and live-notification connections are kept in memory: correct for one instance; several instances would need Redis.
+- Account lockout can be triggered by someone who knows a user's email (they can't get in, but the owner waits 15 minutes).
+- Registration says when an email is already taken, which reveals that the email is registered (rate-limited).
+- National ID numbers are stored unencrypted; production would use column or disk-level encryption.
+- Swagger UI is public; disable with `springdoc.swagger-ui.enabled=false` if the API docs shouldn't be visible.
+
 ## Testing
 
 | Layer | Tooling | What is covered |
@@ -122,7 +152,7 @@ Listeners run inside the transfer's transaction, so a rolled-back transfer never
 | **End-to-end** | Playwright (desktop + Pixel 7) | Demo transfer → receipt → history, registration + new USD account, **two users: request → pay → notification**, budget + recurring transfer from the UI, protected routes and logout |
 
 ```bash
-cd p2p-transfer && ./mvnw verify          # 172 tests — no database or Docker required
+cd p2p-transfer && ./mvnw verify          # 175 tests — no database or Docker required
 cd frontend && npm test                   # 56 tests
 cd frontend && npx playwright test        # needs the dev server running (see "Try it")
 ```
@@ -149,6 +179,7 @@ CI runs all three on every push and pull request.
 | `app.security.max-failed-logins` / `lock-duration` | `5` / `15m` | Login lockout |
 | `app.onboarding.welcome-balance` | `0` (`2500` in `demo`) | Starting balance of a new customer's first account |
 | `server.servlet.session.timeout` | `15m` | Idle session timeout |
+| `COOKIE_SECURE` | `false` | Set `true` behind HTTPS so the session cookie is never sent over plain HTTP |
 | `app.payment-requests.expiry` | `7d` | How long a money request stays payable |
 | `app.scheduled-transfers.poll-interval` | `60s` | How often due scheduled transfers are executed |
 | `app.rate-limit.<rule>.capacity` / `period` | login 10/1m, register 5/10m, lookup 30/1m, transfer 20/1m, payment-request 10/1m | Token-bucket limits (`app.rate-limit.enabled=false` switches them off) |

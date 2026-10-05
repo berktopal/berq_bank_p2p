@@ -9,7 +9,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -55,7 +58,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .securityContext(sc -> sc.securityContextRepository(securityContextRepository()))
-                .sessionManagement(sm -> sm.sessionFixation(sf -> sf.changeSessionId()))
+                .sessionManagement(sm -> sm
+                        .sessionFixation(sf -> sf.changeSessionId())
+                        // Oturum kaydı: şifre değişince kullanıcının diğer oturumları sonlandırılabilsin
+                        .maximumSessions(-1)
+                        .sessionRegistry(sessionRegistry())
+                        .expiredSessionStrategy(event -> ProblemResponses.write(event.getResponse(), ErrorCode.UNAUTHENTICATED)))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> ProblemResponses.write(res, ErrorCode.UNAUTHENTICATED))
                         .accessDeniedHandler((req, res, e) -> ProblemResponses.write(res, ErrorCode.ACCESS_DENIED)))
@@ -71,6 +79,17 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
         return http.build();
+    }
+
+    @Bean
+    SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    /** Oturum yok edildiğinde/kimliği değiştiğinde kayıt güncel kalsın diye servlet olaylarını Spring'e iletir. */
+    @Bean
+    HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 
     @Bean

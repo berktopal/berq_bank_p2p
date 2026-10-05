@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,13 +39,15 @@ public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
     private final SecurityContextRepository securityContextRepository;
+    private final SessionRegistry sessionRegistry;
     private final SecurityContextHolderStrategy contextHolder = SecurityContextHolder.getContextHolderStrategy();
 
     public AuthController(AuthService authService, UserRepository userRepository,
-                          SecurityContextRepository securityContextRepository) {
+                          SecurityContextRepository securityContextRepository, SessionRegistry sessionRegistry) {
         this.authService = authService;
         this.userRepository = userRepository;
         this.securityContextRepository = securityContextRepository;
+        this.sessionRegistry = sessionRegistry;
     }
 
     @Operation(summary = "CSRF token'ını üretir ve XSRF-TOKEN çerezine yazar")
@@ -89,5 +92,6 @@ public class AuthController {
         context.setAuthentication(authentication);
         contextHolder.setContext(context);
         securityContextRepository.saveContext(context, request, response);
+        sessionRegistry.registerNewSession(request.getSession().getId(), principal);
     }
 }

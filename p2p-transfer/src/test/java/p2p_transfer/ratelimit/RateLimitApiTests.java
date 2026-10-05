@@ -47,6 +47,23 @@ class RateLimitApiTests extends IntegrationTest {
     }
 
     @Test
+    void savingContactsAndCreatingSchedulesShareTheLookupQuota() throws Exception {
+        User eve = data.user("Eve");
+        Account target = data.account(data.user("Bob"), "0");
+        for (int i = 0; i < 30; i++) {
+            mvc.perform(get("/api/accounts/lookup").param("iban", target.getIban()).with(as(eve)))
+                    .andExpect(status().isOk());
+        }
+        // Başka bir uç noktadan IBAN → isim sorgusu yaparak sınır atlatılamaz
+        mvc.perform(post("/api/contacts").with(as(eve)).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nickname\":\"x\",\"iban\":\"%s\"}".formatted(target.getIban())))
+                .andExpect(status().isTooManyRequests());
+        mvc.perform(post("/api/scheduled-transfers").with(as(eve)).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
     void unrelatedEndpointsAreNotLimited() throws Exception {
         User ada = data.user("Ada");
         for (int i = 0; i < 50; i++) {
